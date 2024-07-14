@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <Version>5.0.4</Version>
+        <PackageId>com.strava.v3.api</PackageId>
+        <Authors>Sascha Simon / Robert Eves / Truong Xuan</Authors>
+        <Product>Strava DotNet API</Product>
+        <Description>DotNet API Helper for Strava API v3
+            Forked from https://github.com/RobertEves92/stravadotnet.git via https://github.com/LarsAndreasEk/stravadotnet via https://github.com/timheuer/stravadotnet via
+            Original API Copyright (C) 2014 Sascha Simon, Robert Eves, Truong Xuan
+        </Description>
+        <PackageProjectUrl>https://github.com/tdao7/.Net-Strava-API</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/tdao7/.Net-Strava-API.git</RepositoryUrl>
+        <RepositoryType/>
+        <Copyright>(C) 2014 Sascha Simon / 2021 Robert Eves / 2024 Truong Xuan</Copyright>
+        <PackageTags>Strava, API, APIV3, Strava .Net, Strava .NET Core, Strava V3 .Net Core</PackageTags>
+        <Company>VCoderLog</Company>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.NETCore.Targets" Version="5.0.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
+        <PackageReference Include="System.Drawing.Common" Version="7.0.0"/>
+        <PackageReference Include="System.Runtime" Version="4.3.1"/>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+</Project>
