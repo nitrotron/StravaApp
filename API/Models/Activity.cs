@@ -67,7 +67,7 @@ public class Activity
     /// </summary>
     // public String City { get => _city??""; set => _city = value; }
     // private String? _city;
-    public String City {get; set;}
+    public String City { get; set; }
 
     /// <summary>
     /// The state where this activity was started.
@@ -225,6 +225,14 @@ public class Activity
     /// Map representing the route of the activity.
     /// </summary>
     public long MapId { get; set; }
+    /// <summary>
+    /// Detailed Polyline representing the route of the activity.
+    /// </summary>
+    public string Polyline { get; set; }
+    /// <summary>
+    /// Summary Polyline representing the route of the activity.
+    /// </summary>
+    public string SummaryPolyline { get; set; }
 
     /// <summary>
     /// Meta object of the athlete of this activity.
@@ -239,17 +247,17 @@ public class Activity
     /// <summary>
     /// The identifier of the upload that resulted in this activity
     /// </summary>
-    public long? uploadId { get; set; }
+    public long? UploadId { get; set; }
 
     /// <summary>
     /// The unique identifier of the upload in string format
     /// </summary>
-    public string uploadIdStr { get; set; }
+    public string UploadIdStr { get; set; }
 
     /// <summary>
     /// The name of the device used to record the activity
     /// </summary>
-    public string deviceName { get; set; }
+    public string DeviceName { get; set; }
 
     public static Activity ApiActivityToModel(com.strava.v3.api.Activities.ActivitySummary activitySummary)
     {
@@ -257,7 +265,7 @@ public class Activity
         {
             Id = activitySummary.Id,
             Name = activitySummary.Name,
-            Type =  activitySummary.Type.ToString(),
+            Type = activitySummary.Type.ToString(),
             SportType = activitySummary.SportType.ToString(),
             Distance = activitySummary.Distance,
             MovingTime = activitySummary.MovingTime,
@@ -267,10 +275,10 @@ public class Activity
             AverageHeartrate = activitySummary.AverageHeartrate,
             MaxHeartrate = activitySummary.MaxHeartrate,
             Truncated = activitySummary.Truncated,
-            City = activitySummary.City??"",
-            State = activitySummary.State??"",
-            Country = activitySummary.Country??"",
-            GearId = activitySummary.GearId??"",
+            City = activitySummary.City ?? "",
+            State = activitySummary.State ?? "",
+            Country = activitySummary.Country ?? "",
+            GearId = activitySummary.GearId ?? "",
             AverageSpeed = activitySummary.AverageSpeed,
             MaxSpeed = activitySummary.MaxSpeed,
             AverageCadence = activitySummary.AverageCadence,
@@ -300,13 +308,15 @@ public class Activity
             HasPowerMeter = activitySummary.HasPowerMeter,
             AthleteId = activitySummary.Athlete.Id,
             SufferScore = activitySummary.SufferScore,
-            uploadId = activitySummary.uploadId,
-            uploadIdStr = activitySummary.uploadIdStr,
-            deviceName = activitySummary.deviceName??""
+            UploadId = activitySummary.uploadId,
+            UploadIdStr = activitySummary.uploadIdStr,
+            DeviceName = activitySummary.deviceName ?? "",
+            Polyline = activitySummary.Map.Polyline ?? "",
+            SummaryPolyline = activitySummary.Map.SummaryPolyline ?? ""
         };
         long.TryParse(activitySummary.Map.Id, out long temp);
         returnActivity.MapId = temp;
 
-    return returnActivity;
+        return returnActivity;
     }
 }

@@ -11,19 +11,31 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Athlete = com.strava.v3.api.Athletes.Athlete;
+using API.Models;
 
 namespace API
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StravaUserController(DataContext context) : ControllerBase
+    public class StravaController(DataContext context) : ControllerBase
     {
 
         [HttpGet]
-        public async Task<ActionResult<Athlete>> SyncUser()
+        [Route("SyncAll/{athleteId:long}")]
+        public async Task<ActionResult<Models.Athlete>> SyncAll(long athleteId)
         {
             try
             {
+                // Models.Athlete? dbAthlete = await context.Athletes.FirstOrDefaultAsync();
+
+                // Models.User? user =  await context.Users.FirstOrDefaultAsync();
+                Models.User? user = await context.Users.Where(x => x.AthleteId == athleteId).FirstOrDefaultAsync<User>();
+                if (user == null)
+                {
+                    throw new Exception("User not found.");
+                }
+
+
                 List<Models.Oauth> oauths = await context.Oauths.ToListAsync();
                 if (oauths.Count != 1)
                 {
@@ -31,22 +43,22 @@ namespace API
                 }
                 Models.Oauth oauth = oauths[0];
 
-                if (DateTimeOffset.FromUnixTimeSeconds(oauth.ExpiresAtEpoch).DateTime.AddHours(-1) < DateTime.UtcNow)
+                if (DateTimeOffset.FromUnixTimeSeconds(user.ExpiresAtEpoch).DateTime.AddHours(-1) < DateTime.UtcNow)
                 {
-                    StaticAuthentication refresh = new StaticAuthentication(oauth.RefreshToken);
+                    StaticAuthentication refresh = new StaticAuthentication(user.RefreshToken);
                     RefreshClient refreshClient = new RefreshClient(refresh);
-                    AccessToken token = await refreshClient.RefreshAccessTokenAsync(oauth.RefreshToken, oauth.ClientID, oauth.ClientSecret);
+                    AccessToken token = await refreshClient.RefreshAccessTokenAsync(user.RefreshToken, oauth.ClientID, oauth.ClientSecret);
 
-                    oauth.AccessToken = token.Token;
-                    oauth.RefreshToken = token.RefreshToken;
+                    user.AccessToken = token.Token;
+                    user.RefreshToken = token.RefreshToken;
                     long.TryParse(token.ExpiresAt, out long tempEpoch); //hacky
-                    oauth.ExpiresAtEpoch = tempEpoch;
+                    user.ExpiresAtEpoch = tempEpoch;
                     context.SaveChanges();
                 }
 
 
 
-                StaticAuthentication auth = new StaticAuthentication(oauth.AccessToken);
+                StaticAuthentication auth = new StaticAuthentication(user.AccessToken);
                 StravaClient client = new StravaClient(auth);
 
                 Athlete athlete = client.Athletes.GetAthlete();
@@ -70,22 +82,41 @@ namespace API
                 foreach (ActivitySummary activitySum in activities)
                 {
                     Models.Activity? matchActivity = dbActivities.FirstOrDefault(x => x.Id == activitySum.Id);
+
                     if (matchActivity == null)
                     {
                         context.Activities.Add(Models.Activity.ApiActivityToModel(activitySum));
                     }
+
                 }
                 context.SaveChanges();
 
 
                 // Activity activity = client.Activities.GetActivity("11841281294", true);
-                return Ok(athlete);
+                return Ok(dbAthlete);
             }
             catch (Exception ex)
             {
                 return NotFound(ex.ToString());
             }
 
+        }
+        [HttpGet]
+        [Route("GetAthlete")]
+        public async Task<ActionResult<Models.Athlete>> GetAthlete()
+        {
+            Models.Athlete? dbAthlete = await context.Athletes.FirstOrDefaultAsync();
+
+            return dbAthlete == null ? NotFound("Athlete not found. Run authorization") : Ok(dbAthlete);
+        }
+
+        [HttpGet]
+        [Route("GetActivities/{athleteId:long}")]
+        public async Task<ActionResult<IEnumerable<Models.Athlete>>> GetActivities(long athleteId)
+        {
+            List<Models.Activity> activities = await context.Activities.Where(x => x.AthleteId == athleteId).ToListAsync();
+
+            return activities == null ? NotFound("Activities not found. Run Sync") : Ok(activities);
         }
     }
 }
